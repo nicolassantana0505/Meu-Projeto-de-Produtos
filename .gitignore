@@ -1,0 +1,15 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+
+# Variáveis de ambiente e segredos
+.env
+.env.*
+
+# Node.js
+node_modules/
+
+# Arquivos de build
+dist/
+build/

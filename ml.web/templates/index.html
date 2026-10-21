@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Esse produto vai vender muito?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fundo: #E9EEF2;
+    --painel: #FFFFFF;
+    --tinta: #16222E;
+    --suave: #5B6B7A;
+    --linha: #CBD5DD;
+    --sim: #1F8A70;
+    --nao: #B23A54;
+    --foco: #2B5FD9;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--fundo);
+    color: var(--tinta);
+    font-family: "Figtree", system-ui, sans-serif;
+    line-height: 1.5;
+  }
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 48px 20px 64px;
+  }
+  h1 {
+    font-family: "Bricolage Grotesque", "Figtree", sans-serif;
+    font-weight: 700;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    line-height: 1.05;
+    margin: 0 0 8px;
+    max-width: 16ch;
+  }
+  .sub { color: var(--suave); margin: 0 0 36px; max-width: 56ch; }
+  .grade { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 760px) { .grade { grid-template-columns: 1fr; } }
+  .painel {
+    background: var(--painel);
+    border: 1px solid var(--linha);
+    border-radius: 6px;
+    padding: 24px;
+  }
+  h2 {
+    font-family: "Bricolage Grotesque", "Figtree", sans-serif;
+    font-size: 1.15rem;
+    margin: 0 0 16px;
+  }
+  h3 {
+    font-size: .92rem;
+    font-weight: 600;
+    color: var(--suave);
+    margin: 24px 0 8px;
+  }
+  label { display: block; font-weight: 600; font-size: .92rem; margin-bottom: 4px; }
+  .campo { margin-bottom: 16px; }
+  input, select {
+    width: 100%;
+    font: inherit;
+    padding: 10px 12px;
+    border: 1px solid var(--linha);
+    border-radius: 4px;
+    background: #fff;
+    color: var(--tinta);
+  }
+  input:focus-visible, select:focus-visible, button:focus-visible {
+    outline: 3px solid var(--foco);
+    outline-offset: 1px;
+  }
+  button {
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 11px 18px;
+    border: 1px solid var(--tinta);
+    background: var(--tinta);
+    color: #fff;
+  }
+  button:disabled { opacity: .55; cursor: wait; }
+  button.secundario { background: transparent; color: var(--tinta); border-color: var(--linha); margin-top: 24px; }
+
+  .resultado { min-height: 150px; }
+  .vazio { color: var(--suave); margin: 0; }
+  .veredito {
+    font-family: "Bricolage Grotesque", "Figtree", sans-serif;
+    font-weight: 700;
+    font-size: 3.4rem;
+    line-height: 1;
+    margin: 0 0 6px;
+  }
+  .veredito.sim { color: var(--sim); }
+  .veredito.nao { color: var(--nao); }
+  .pergunta { color: var(--suave); margin: 0 0 18px; }
+
+  /* barra de probabilidade com marcador do limiar de decisão */
+  .barra { position: relative; height: 10px; background: #E3E9EE; border-radius: 5px; margin-top: 4px; }
+  .barra span { display: block; height: 100%; background: var(--sim); width: 0; border-radius: 5px; transition: width .4s ease; }
+  .barra i { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--tinta); }
+  .legenda { font-size: .9rem; color: var(--suave); margin: 10px 0 0; }
+  .erro { color: var(--nao); font-weight: 500; margin: 0; }
+
+  .modelo { margin-top: 20px; }
+  .metricas { display: flex; gap: 28px; flex-wrap: wrap; margin-bottom: 8px; }
+  .metricas strong { display: block; font-size: 1.6rem; font-family: "Bricolage Grotesque", sans-serif; }
+  .metricas span { color: var(--suave); font-size: .88rem; }
+  .nota { color: var(--suave); font-size: .88rem; margin: 4px 0 0; max-width: 70ch; }
+  table { border-collapse: collapse; font-size: .92rem; }
+  th, td { border: 1px solid var(--linha); padding: 8px 12px; text-align: center; }
+  th { background: #F3F6F8; font-weight: 600; }
+  td.venc { font-weight: 600; color: var(--sim); }
+  .tabelas { display: flex; gap: 32px; flex-wrap: wrap; }
+
+  .imp { display: grid; grid-template-columns: minmax(130px, 220px) 1fr 64px; gap: 10px; align-items: center; font-size: .92rem; margin-bottom: 6px; }
+  .imp .trilho { height: 8px; background: #E3E9EE; border-radius: 4px; overflow: hidden; }
+  .imp .trilho span { display: block; height: 100%; border-radius: 4px; }
+  .imp .valor { text-align: right; color: var(--suave); font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Esse produto vai vender muito?</h1>
+  <p class="sub">Informe os dados de um produto novo. O sistema compara regressão logística e árvore de decisão com os produtos do seu banco e responde com o melhor modelo.</p>
+
+  <div class="grade">
+    <section class="painel">
+      <h2>Dados do produto</h2>
+      <div id="form">
+        <div class="campo">
+          <label for="preco">Preço (R$)</label>
+          <input id="preco" type="number" min="0" step="0.01" value="250" inputmode="decimal">
+        </div>
+        <div class="campo">
+          <label for="estoque">Estoque (unidades)</label>
+          <input id="estoque" type="number" min="0" step="1" value="20" inputmode="numeric">
+        </div>
+        <div class="campo">
+          <label for="categoria">Categoria</label>
+          <select id="categoria"><option>Carregando…</option></select>
+        </div>
+        <button id="prever" type="button">Prever vendas</button>
+      </div>
+    </section>
+
+    <section class="painel resultado" aria-live="polite" id="resultado">
+      <p class="vazio">Preencha os dados e clique em “Prever vendas”.</p>
+    </section>
+  </div>
+
+  <section class="painel modelo">
+    <h2>Sobre o modelo</h2>
+    <div id="info"><p class="vazio">Carregando…</p></div>
+    <button id="retreinar" type="button" class="secundario">Retreinar com os dados atuais</button>
+  </section>
+</main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  // Escapa texto vindo do banco antes de colocar no HTML
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => (
+    { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+  ));
+
+  const pct = (v, casas = 1) => (v == null ? "—" : (v * 100).toFixed(casas) + "%");
+
+  async function pedir(url, opcoes) {
+    const resp = await fetch(url, opcoes);
+    const dados = await resp.json();
+    if (!resp.ok) throw new Error(dados.erro || "Algo deu errado.");
+    return dados;
+  }
+
+  function mostrarModelo(m) {
+    const select = $("categoria");
+    const atual = select.value;
+    select.innerHTML = m.categorias.map((c) => `<option>${esc(c)}</option>`).join("");
+    if (m.categorias.includes(atual)) select.value = atual;
+
+    const [[vn, fp], [fn, vp]] = m.matriz;
+    const x = m.metricas;
+
+    const melhorF1 = Math.max(...m.comparacao.map((c) => c.f1_medio));
+    const linhasComparacao = m.comparacao.map((c) => `
+      <tr>
+        <td style="text-align:left">${esc(c.nome)}</td>
+        <td class="${c.f1_medio === melhorF1 ? "venc" : ""}">${c.f1_medio.toFixed(3)} ± ${c.f1_desvio.toFixed(3)}</td>
+      </tr>`).join("");
+
+    const maxImp = Math.max(...m.importancias.map((i) => Math.abs(i.valor)), 1e-9);
+    const linhasImp = m.importancias.map((i) => `
+      <div class="imp">
+        <span>${esc(i.nome)}</span>
+        <div class="trilho"><span style="width:${(Math.abs(i.valor) / maxImp) * 100}%;background:${i.valor >= 0 ? "var(--sim)" : "var(--nao)"}"></span></div>
+        <span class="valor">${i.valor > 0 ? "+" : ""}${i.valor.toFixed(2)}</span>
+      </div>`).join("");
+
+    const notaImp = m.tipo_importancia === "coeficiente"
+      ? "Verde aumenta a chance de vender muito; vermelho diminui. Números e categorias estão na mesma escala."
+      : "Quanto maior a barra, mais a variável ajudou a árvore a separar os produtos.";
+
+    $("info").innerHTML = `
+      <p class="nota" style="margin:0 0 16px">Modelo escolhido: <strong>${esc(m.modelo)}</strong> · limiar de decisão: <strong>${pct(m.limiar, 0)}</strong></p>
+      <div class="metricas">
+        <div><strong>${pct(x.acuracia)}</strong><span>acurácia</span></div>
+        <div><strong>${pct(x.precisao)}</strong><span>precisão</span></div>
+        <div><strong>${pct(x.recall)}</strong><span>recall</span></div>
+        <div><strong>${pct(x.f1)}</strong><span>F1</span></div>
+        <div><strong>${x.roc_auc == null ? "—" : x.roc_auc.toFixed(2)}</strong><span>ROC-AUC</span></div>
+      </div>
+      <p class="nota">Métricas calculadas em ${m.teste} dos ${m.total} produtos, separados antes do treino.</p>
+
+      <div class="tabelas">
+        <div>
+          <h3>Matriz de confusão</h3>
+          <table>
+            <tr><th></th><th>Previu não</th><th>Previu sim</th></tr>
+            <tr><th>Foi não</th><td>${vn}</td><td>${fp}</td></tr>
+            <tr><th>Foi sim</th><td>${fn}</td><td>${vp}</td></tr>
+          </table>
+        </div>
+        <div>
+          <h3>Comparação (F1 em validação cruzada)</h3>
+          <table>
+            <tr><th>Modelo</th><th>F1 médio</th></tr>
+            ${linhasComparacao}
+          </table>
+        </div>
+      </div>
+
+      <h3>O que mais pesa na decisão</h3>
+      ${linhasImp}
+      <p class="nota">${notaImp}</p>`;
+  }
+
+  async function carregarModelo() {
+    try {
+      mostrarModelo(await pedir("/api/modelo"));
+    } catch (e) {
+      $("categoria").innerHTML = "<option>Indisponível</option>";
+      $("info").innerHTML = `<p class="erro">${esc(e.message)}</p>`;
+    }
+  }
+
+  $("prever").addEventListener("click", async () => {
+    const botao = $("prever");
+    botao.disabled = true;
+    try {
+      const r = await pedir("/api/prever", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          preco: $("preco").value,
+          estoque: $("estoque").value,
+          categoria: $("categoria").value,
+        }),
+      });
+      const chance = Math.round(r.probabilidade * 100);
+      const limiar = Math.round(r.limiar * 100);
+      $("resultado").innerHTML = `
+        <p class="pergunta">Vendeu muito?</p>
+        <p class="veredito ${r.vendeu_muito ? "sim" : "nao"}">${esc(r.resultado)}</p>
+        <div class="barra" role="img" aria-label="Chance de ${chance}%, limiar de decisão de ${limiar}%">
+          <span style="width:${chance}%"></span>
+          <i style="left:${limiar}%" title="Limiar de decisão"></i>
+        </div>
+        <p class="legenda">Chance estimada de vender muito: ${chance}%. A linha escura marca o limiar de decisão (${limiar}%): acima dela, a resposta é “Sim”.</p>`;
+    } catch (e) {
+      $("resultado").innerHTML = `<p class="erro">${esc(e.message)}</p>`;
+    } finally {
+      botao.disabled = false;
+    }
+  });
+
+  $("retreinar").addEventListener("click", async () => {
+    const botao = $("retreinar");
+    botao.disabled = true;
+    botao.textContent = "Treinando…";
+    try {
+      mostrarModelo(await pedir("/api/treinar", { method: "POST" }));
+    } catch (e) {
+      $("info").innerHTML = `<p class="erro">${esc(e.message)}</p>`;
+    } finally {
+      botao.disabled = false;
+      botao.textContent = "Retreinar com os dados atuais";
+    }
+  });
+
+  carregarModelo();
+</script>
+</body>
+</html>
